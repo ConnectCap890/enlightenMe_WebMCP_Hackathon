@@ -19,4 +19,8 @@ class LectureResponseSerializer(serializers.Serializer):
     source         = serializers.CharField()
     youtube_url    = serializers.CharField(allow_blank=True)
     plain_english  = serializers.CharField(allow_blank=True)
+
+
+class SearchLectureSerializer(serializers.Serializer):
+    topic = serializers.CharField(max_length=200, required=True)
         
