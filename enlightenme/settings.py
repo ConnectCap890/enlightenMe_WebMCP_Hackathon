@@ -12,10 +12,19 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
+    # Django contrib apps (needed so models like Permission import correctly)
+    'django.contrib.admin',
+    'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Third-party
     'rest_framework',
     'corsheaders',
+
+    # Your apps
     'lectures',
     'quizzes',
     'users',
@@ -23,7 +32,12 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
 ROOT_URLCONF = 'enlightenme.urls'
@@ -41,7 +55,15 @@ TEMPLATES = [{
 
 WSGI_APPLICATION = 'enlightenme.wsgi.application'
 
-# MongoDB Atlas
+# Minimal relational DB for Django internals (sqlite, local dev only)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# MongoDB Atlas (still used for your application models)
 mongoengine.connect(host=os.getenv('MONGODB_URI'))
 
 # DRF + JWT
@@ -59,10 +81,13 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
 }
 
-# CORS
+# CORS - include Vite dev server ports for local development
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:5173', 
-    # Vite dev server 'http://127.0.0.1:5173', os.getenv('FRONTEND_URL', 'http://localhost:5500'), ]
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    os.getenv('FRONTEND_URL', 'http://localhost:5500'),
 ]
 CORS_ALLOW_CREDENTIALS = True
 
