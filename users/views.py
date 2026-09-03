@@ -27,19 +27,24 @@ def register(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        user   = create_user(
-            username = serializer.validated_data['username'],
-            email    = serializer.validated_data['email'],
-            password = serializer.validated_data['password'],
+        user = create_user(
+            username=serializer.validated_data['username'],
+            email=serializer.validated_data['email'],
+            password=serializer.validated_data['password'],
         )
-        response = UserResponseSerializer(user.to_dict())
-        return Response(response.data, status=status.HTTP_201_CREATED)
+        # Return the created user dict directly (avoid mis-initializing a DRF Serializer)
+        return Response(user.to_dict(), status=status.HTTP_201_CREATED)
 
     except ValueError as e:
-        return Response(
-            {'error': str(e)},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        # Known validation error from create_user (email/username taken)
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        # Catch-all so the API returns a JSON error instead of a 500 HTML page.
+        # Log exception to console for debugging.
+        import traceback
+        traceback.print_exc()
+        return Response({'error': 'Internal server error', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])

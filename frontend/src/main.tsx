@@ -1,13 +1,21 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import App from './App.tsx'
 import './index.css'
-import App from './App'
+import registerTools from './webmcp'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </StrictMode>,
+// Register WebMCP tools when app loads
+if ('modelContext' in document) {
+    registerTools()
+} else {
+    console.log('WebMCP not available — running in normal browser mode')
+}
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
+    </React.StrictMode>,
 )
