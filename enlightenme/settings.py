@@ -4,7 +4,12 @@ from dotenv import load_dotenv
 import mongoengine
 import os
 
-load_dotenv()
+ENV = os.getenv('DJANGO_ENV','development')
+
+if ENV == 'production':
+    load_dotenv('.env.production')
+else:
+    load_dotenv('.env')    
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'changeme')

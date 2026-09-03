@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 *.pyo
 .env
+.env.production
 
 # Django
 db.sqlite3
@@ -18,4 +19,7 @@ frontend/.env
 
 # OS
 .DS_Store
-Thumbs.db
+Thumbs.dbdb.sqlite3
+.env
+frontend/.env
+frontend/.env.local
