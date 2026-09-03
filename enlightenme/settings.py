@@ -96,6 +96,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5500',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://enlightenme.vercel.app',
 ]
 _frontend_url = os.getenv('FRONTEND_URL', '')
 if _frontend_url:
