@@ -61,9 +61,8 @@ SIMPLE_JWT = {
 
 # CORS
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5500',
-    'http://127.0.0.1:5500',
-    os.getenv('FRONTEND_URL', 'http://localhost:5500'),
+    'http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:5173', 
+    # Vite dev server 'http://127.0.0.1:5173', os.getenv('FRONTEND_URL', 'http://localhost:5500'), ]
 ]
 CORS_ALLOW_CREDENTIALS = True
 
