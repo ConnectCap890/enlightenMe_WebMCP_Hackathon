@@ -98,6 +98,11 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5173',
     'https://enlightenme.vercel.app',
 ]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+]
+
 _frontend_url = os.getenv('FRONTEND_URL', '')
 if _frontend_url:
     CORS_ALLOWED_ORIGINS.append(_frontend_url)
