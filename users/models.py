@@ -40,6 +40,22 @@ class User(Document):
             'email':      self.email,
             'created_at': self.created_at.isoformat(),
         }
+    @property
+    def is_authenticated(self) -> bool:
+        # DRF/Django checks this attribute on request.user
+        return True
+
+    @property
+    def is_anonymous(self) -> bool:
+        return False
+
+    @property
+    def is_active(self) -> bool:
+        # Return False here if you implement account disabling
+        return True
+
+    def __str__(self) -> str:
+        return self.username
 
 
 class WeakTopic(EmbeddedDocument):
