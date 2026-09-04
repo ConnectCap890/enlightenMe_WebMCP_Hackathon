@@ -25,6 +25,12 @@ export function useEnlightenMeTools() {
       console.warn('WebMCP not available — enable chrome://flags/#enable-webmcp-testing')
       return
     }
+    // Check if tools already registered
+    const alreadyRegistered = (window as any).__enlightenMeToolsRegistered
+    if (alreadyRegistered) return
+    ;(window as any).__enlightenMeToolsRegistered = true
+
+    
 
     const controllers: AbortController[] = []
 
