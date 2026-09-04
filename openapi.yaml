@@ -1,0 +1,303 @@
+openapi: 3.1.0
+info:
+  title: Enlighten Me API
+  description: AI-powered learning platform
+  version: 1.0.0
+servers:
+  - url: https://enlightenme-webmcp-hackathon.onrender.com
+
+paths:
+
+  # ── USERS ──────────────────────────────────────────────
+
+  /api/users/register/:
+    post:
+      operationId: register_user
+      summary: Register a new user account. No token needed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username: { type: string }
+                email:    { type: string }
+                password: { type: string }
+      responses:
+        '201':
+          description: Created user object
+
+  /api/users/login/:
+    post:
+      operationId: login_user
+      summary: Login and get JWT tokens. No token needed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:    { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: JWT tokens and user data
+
+  /api/users/profile/:
+    get:
+      operationId: get_profile
+      summary: Get logged-in user profile and stats.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: user object and stats
+
+  /api/users/progress/:
+    get:
+      operationId: get_progress
+      summary: Get all quiz progress records for logged-in user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of progress records
+
+  # ── LECTURES ───────────────────────────────────────────
+
+  /api/lectures/:
+    get:
+      operationId: get_all_lectures
+      summary: Get all lectures for the logged-in user. Use to populate dashboard.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: lectures array
+
+  /api/lectures/search/:
+    post:
+      operationId: search_lectures
+      summary: Search YouTube for top 3 lecture videos on a topic.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [topic]
+              properties:
+                topic: { type: string }
+      responses:
+        '200':
+          description: topic and results array with video_id, title, channel, url, thumbnail
+
+  /api/lectures/create/:
+    post:
+      operationId: create_lecture
+      summary: Create a lecture. Fetches YouTube transcript automatically if source is youtube.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [source]
+              properties:
+                youtube_url: { type: string }
+                source:
+                  type: string
+                  enum: [youtube, chatgpt]
+                title: { type: string }
+      responses:
+        '201':
+          description: Created lecture with id and transcript
+
+  /api/lectures/{lecture_id}/explain/:
+    post:
+      operationId: save_explanation
+      summary: Save 3-level explanation, key concepts, and related topics to a lecture.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: lecture_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [plain_english, technical, advanced]
+              properties:
+                plain_english: { type: string }
+                technical:     { type: string }
+                advanced:      { type: string }
+                key_concepts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      title:       { type: string }
+                      explanation: { type: string }
+                related_topics:
+                  type: array
+                  items: { type: string }
+      responses:
+        '200':
+          description: Updated lecture object
+
+  /api/lectures/{lecture_id}/:
+    get:
+      operationId: get_lecture
+      summary: Get a single lecture by ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: lecture_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Lecture object
+    delete:
+      operationId: delete_lecture
+      summary: Delete a lecture by ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: lecture_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Deleted successfully
+
+  # ── QUIZZES ────────────────────────────────────────────
+
+  /api/quizzes/generate/:
+    post:
+      operationId: get_quiz_prompt
+      summary: Get quiz generation prompt from lecture content. Use the returned prompt to generate 10 questions yourself, then call save_quiz.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lecture_id, difficulty]
+              properties:
+                lecture_id: { type: string }
+                difficulty:
+                  type: string
+                  enum: [easy, medium, hard]
+      responses:
+        '200':
+          description: prompt, lecture_id, difficulty
+
+  /api/quizzes/save/:
+    post:
+      operationId: save_quiz
+      summary: Save AI-generated quiz questions to database. Returns quiz_id needed for submit_answer.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lecture_id, difficulty, questions]
+              properties:
+                lecture_id: { type: string }
+                difficulty:
+                  type: string
+                  enum: [easy, medium, hard]
+                questions:
+                  type: array
+                  items:
+                    type: object
+                    required: [question, options, correct]
+                    properties:
+                      question:    { type: string }
+                      options:
+                        type: array
+                        items: { type: string }
+                      correct:
+                        type: integer
+                        description: 0-based index of correct option
+                      explanation: { type: string }
+                      topic:       { type: string }
+      responses:
+        '201':
+          description: Saved quiz with id
+
+  /api/quizzes/submit/:
+    post:
+      operationId: submit_answer
+      summary: Submit user answers. Returns score, percentage, and weak topics. Also saves progress.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quiz_id, lecture_id, answers]
+              properties:
+                quiz_id:    { type: string }
+                lecture_id: { type: string }
+                answers:
+                  type: array
+                  items: { type: integer }
+                  description: 0-based selected option index per question in order
+      responses:
+        '200':
+          description: score, total, percentage, difficulty, weak_topics
+
+  /api/quizzes/weak-topics/:
+    get:
+      operationId: get_weak_topics
+      summary: Get ranked list of topics the user struggles with most. Use to recommend what to study next.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: weak_topics array ranked by priority
+
+  /api/quizzes/{quiz_id}/:
+    get:
+      operationId: get_quiz
+      summary: Get a single quiz by ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: quiz_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Quiz object with questions
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
