@@ -19,15 +19,18 @@ async function api(method: string, path: string, body?: object) {
 
 export function useEnlightenMeTools() {
     useEffect(() => {
-        if (!(window as any).modelContext) {
+        console.log('document.modelContext:', (document as any).modelContext)
+        console.log('window.modelContext:', (window as any).modelContext)
+
+        const ctx = (document as any).modelContext ?? (window as any).modelContext
+
+        if (!ctx) {
             console.warn('WebMCP not available')
             return
         }
 
         if ((window as any).__enlightenMeToolsRegistered) return
         ;(window as any).__enlightenMeToolsRegistered = true
-
-        const ctx = (window as any).modelContext
 
         ctx.registerTool({
             name: 'search_lectures',
