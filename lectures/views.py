@@ -54,6 +54,7 @@ def create_lecture(request):
     title       = serializer.validated_data.get('title', '')
 
     try:
+        transcript = ''
         if source == 'youtube':
             video_id = extract_video_id(youtube_url)
             transcript = fetch_transcript(video_id)
