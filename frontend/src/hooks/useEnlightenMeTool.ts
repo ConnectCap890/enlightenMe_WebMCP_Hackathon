@@ -89,7 +89,7 @@ export function useEnlightenMeTools() {
         required: ['lecture_id', 'plain_english', 'technical', 'advanced'],
       },
       execute: async ({ lecture_id, plain_english, technical, advanced, key_concepts, related_topics }: any) =>
-        api('POST', `/api/lectures/${lecture_id}/explain/`, {
+        api('POST', `/api/lectures/${lecture_id}/save/`, {
           plain_english, technical, advanced,
           key_concepts:   key_concepts   ?? [],
           related_topics: related_topics ?? [],
@@ -108,7 +108,7 @@ export function useEnlightenMeTools() {
         required: ['lecture_id', 'difficulty'],
       },
       execute: async ({ lecture_id, difficulty }: any) =>
-        api('POST', '/api/quizzes/generate/', { lecture_id, difficulty }),
+        api('POST', '/api/quizzes/prompt/', { lecture_id, difficulty }),
     })
 
     register({
